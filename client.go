@@ -113,14 +113,7 @@ func (c *RpcClient) Ping(str ...string) (r string, err error) {
 	if len(str) == 0 {
 		str = append(str, PING)
 	}
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	if c.client == nil {
-		err = ErrClient
-	} else if err = c.client.Call("RpcPing.Ping", str[0], &r); err != nil {
-		c.client.Close()
-		c.client = nil
-	}
+	err = c.Call("RpcPing.Ping", str[0], &r)
 	return
 }
 
@@ -128,4 +121,16 @@ func (c *RpcClient) Disconnect() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.isRunning = false
+}
+
+func (c *RpcClient) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	if c.client == nil {
+		return ErrClient
+	} else if err := c.client.Call(serviceMethod, args, reply); err != nil {
+		c.client.Close()
+		c.client = nil
+	}
+	return nil
 }
