@@ -19,7 +19,7 @@ type RpcClient struct {
 }
 
 func NewRpcClient(c RpcClientConfig, f RpcLogFunc) (*RpcClient, error) {
-	if c == nil {
+	if !c.Valid() {
 		return nil, ErrConfig
 	}
 	return &RpcClient{
@@ -50,9 +50,9 @@ func (c *RpcClient) tryAgain() bool {
 	return c.tryCnt <= c.config.TryCount
 }
 
-func (c *RpcClient) log(str string, err error) {
+func (c *RpcClient) log(msg string, err error) {
 	if c.logFunc != nil {
-		c.logFunc(str, err)
+		c.logFunc(msg, err)
 	}
 }
 
@@ -111,13 +111,13 @@ func (c *RpcClient) IsConnected() bool {
 
 func (c *RpcClient) Ping(str ...string) (r string, err error) {
 	if len(str) == 0 {
-		str = PING
+		str = append(str, PING)
 	}
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	if c.client == nil {
 		err = ErrClient
-	} else if err = c.client.Call("RpcPing.Ping", str, &r); err != nil {
+	} else if err = c.client.Call("RpcPing.Ping", str[0], &r); err != nil {
 		c.client.Close()
 		c.client = nil
 	}
