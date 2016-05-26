@@ -100,10 +100,7 @@ func (c *RpcClient) Connect() {
 func (c *RpcClient) IsConnected() bool {
 	if c.client == nil {
 		return false
-	}
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	if _, err := c.Ping(); err == nil {
+	} else if _, err := c.Ping(); err == nil {
 		return true
 	}
 	return false
