@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+type IRpcServer interface {
+	Ping(string, *string) error
+}
+
 type RpcPing int
 
 func (t *RpcPing) Ping(s string, r *string) error {
@@ -48,11 +52,11 @@ func (s *RpcServer) log(msg string, err error) {
 	}
 }
 
-func (s *RpcServer) run() {
+func (s *RpcServer) run(rcvr IRpcServer) {
 	s.isRunning = true
 	s.log(fmt.Sprintf("gorpc: server running on: %v",
 		s.config.Port), nil)
-	if err := rpc.Register(new(RpcPing)); err != nil {
+	if err := rpc.Register(rcvr); err != nil {
 		s.log(fmt.Sprintf("gorpc: server register error: %v", err), err)
 	} else if addr, err := net.ResolveTCPAddr("tcp", s.GetLinkAddress()); err != nil {
 		s.log(fmt.Sprintf("gorpc: server resolve address error: %v", err), err)
@@ -74,14 +78,14 @@ func (s *RpcServer) run() {
 	s.log("gorpc: server close", nil)
 }
 
-func (s *RpcServer) Start() {
+func (s *RpcServer) Start(rcvr IRpcServer) {
 	if s.IsRunning() {
 		return
 	}
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if !s.IsRunning() {
-		go s.run()
+		go s.run(rcvr)
 	}
 }
 
