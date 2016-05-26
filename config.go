@@ -11,11 +11,14 @@ func (c *rpcConfig) Valid() bool {
 
 type RpcClientConfig struct {
 	rpcConfig
+	Service  string
 	TryCount int
 }
 
-func NewRpcClientConfig(host string, port, tryCount int) RpcClientConfig {
-	if len(host) == 0 {
+func NewRpcClientConfig(service string, host string, port int, tryCount int) RpcClientConfig {
+	if len(service) == 0 {
+		panic(ErrService)
+	} else if len(host) == 0 {
 		host = "127.0.0.1"
 	}
 	return RpcClientConfig{
@@ -23,19 +26,25 @@ func NewRpcClientConfig(host string, port, tryCount int) RpcClientConfig {
 			Host: host,
 			Port: port,
 		},
+		Service:  service,
 		TryCount: tryCount,
 	}
 }
 
 type RpcServerConfig struct {
 	rpcConfig
+	Service IRpcServer
 }
 
-func NewRpcServerConfig(port int) RpcServerConfig {
+func NewRpcServerConfig(service IRpcServer, port int) RpcServerConfig {
+	if service == nil {
+		panic(ErrService)
+	}
 	return RpcServerConfig{
 		rpcConfig: rpcConfig{
 			Host: "127.0.0.1",
 			Port: port,
 		},
+		Service: service,
 	}
 }

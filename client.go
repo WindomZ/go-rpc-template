@@ -113,7 +113,7 @@ func (c *RpcClient) Ping(str ...string) (r string, err error) {
 	if len(str) == 0 {
 		str = append(str, PING)
 	}
-	err = c.Call("RpcPing.Ping", str[0], &r)
+	err = c.Call(c.config.Service+".Ping", str[0], &r)
 	return
 }
 

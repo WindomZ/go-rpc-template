@@ -12,13 +12,6 @@ type IRpcServer interface {
 	Ping(string, *string) error
 }
 
-type RpcPing int
-
-func (t *RpcPing) Ping(s string, r *string) error {
-	*r = s
-	return nil
-}
-
 type RpcServer struct {
 	config    RpcServerConfig
 	logFunc   RpcLogFunc
@@ -52,11 +45,11 @@ func (s *RpcServer) log(msg string, err error) {
 	}
 }
 
-func (s *RpcServer) run(rcvr IRpcServer) {
+func (s *RpcServer) run() {
 	s.isRunning = true
 	s.log(fmt.Sprintf("gorpc: server running on: %v",
 		s.config.Port), nil)
-	if err := rpc.Register(rcvr); err != nil {
+	if err := rpc.Register(s.config.Service); err != nil {
 		s.log(fmt.Sprintf("gorpc: server register error: %v", err), err)
 	} else if addr, err := net.ResolveTCPAddr("tcp", s.GetLinkAddress()); err != nil {
 		s.log(fmt.Sprintf("gorpc: server resolve address error: %v", err), err)
@@ -78,14 +71,14 @@ func (s *RpcServer) run(rcvr IRpcServer) {
 	s.log("gorpc: server close", nil)
 }
 
-func (s *RpcServer) Start(rcvr IRpcServer) {
+func (s *RpcServer) Start() {
 	if s.IsRunning() {
 		return
 	}
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if !s.IsRunning() {
-		go s.run(rcvr)
+		go s.run()
 	}
 }
 
