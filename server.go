@@ -61,7 +61,7 @@ func (s *RpcServer) run() {
 				time.Sleep(time.Second)
 				continue
 			} else {
-				rpc.ServeConn(conn)
+				go rpc.ServeConn(conn)
 				s.log(fmt.Sprintf("gorpc: server connected: %v",
 					conn.RemoteAddr().String()), nil)
 			}
