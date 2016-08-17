@@ -76,7 +76,7 @@ func (c *RpcClient) run() {
 			c.log(fmt.Sprintf("gorpc: client ping error: %v", err), err)
 		} else if len(r) != 0 {
 			c.tryCnt = 0
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Second)
 			continue
 		}
 		c.tryCnt++
